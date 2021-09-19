@@ -36,6 +36,12 @@ public class Hero {
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             angel -= 180.0f * dt;
         }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            position.x -= MathUtils.cosDeg(angel) * 80.0f * dt;
+            position.y -= MathUtils.sinDeg(angel) * 80.0f * dt;
+            lastDisplacement.set(MathUtils.cosDeg(angel) * 80.0f * dt,
+                    MathUtils.sinDeg(angel) * 80.0f * dt);
+        }
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             position.x += MathUtils.cosDeg(angel) * 240.0f * dt;
             position.y += MathUtils.sinDeg(angel) * 240.0f * dt;
