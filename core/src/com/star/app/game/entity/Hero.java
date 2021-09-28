@@ -60,6 +60,12 @@ public class Hero {
             velocity.x += MathUtils.cosDeg(angel) * enginePower * dt;
             velocity.y += MathUtils.sinDeg(angel) * enginePower * dt;
         }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            position.x -= MathUtils.cosDeg(angel) * 80.0f * dt;
+            position.y -= MathUtils.sinDeg(angel) * 80.0f * dt;
+            velocity.x += MathUtils.cosDeg(angel) * dt * -enginePower / 3;
+            velocity.y += MathUtils.sinDeg(angel) * dt * -enginePower / 3;
+        }
         position.mulAdd(velocity, dt);
         float stopKoef = 1.0f - 1.0f * dt;
         if (stopKoef < 0) {
