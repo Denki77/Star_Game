@@ -1,8 +1,11 @@
 package com.star.app.game.controllers;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.star.app.game.Background;
 import com.star.app.game.entity.Bullet;
 import com.star.app.game.entity.Hero;
+import com.star.app.game.entity.Meteor;
+import com.star.app.screen.ScreenManager;
 
 public class GameController {
     private Background background;
@@ -30,7 +33,12 @@ public class GameController {
         this.background = new Background(this);
         this.hero = new Hero(this);
         this.bulletController = new BulletController();
-        this.meteorController = new MeteorController();
+        this.meteorController = new MeteorController(this);
+        for (int i = 0; i < 3; i++) {
+            meteorController.setup(MathUtils.random(0, ScreenManager.SCREEN_WIDTH),
+                    MathUtils.random(0, ScreenManager.SCREEN_HEIGHT),
+                    MathUtils.random(-200, 200), MathUtils.random(-200, 200), 1.0f);
+        }
     }
 
 
@@ -42,15 +50,28 @@ public class GameController {
         checkCollisions();
     }
 
-
     public void checkCollisions() {
-        for (int i = 0; i < bulletController.getActiveList().size(); i++) {
-            Bullet b = bulletController.getActiveList().get(i);
-
-            if (meteorController.getMeteor().getPosition().dst(b.getPosition()) < 256.0f * 0.55f * meteorController.getMeteor().getScale()) {
-                b.deactivate();
-                meteorController.getMeteor().deactivate();
+        for (Bullet b : bulletController.getActiveList()) {
+            for (Meteor a : meteorController.getActiveList()) {
+                if (a.getHitArea().contains(b.getPosition())) {
+                    b.deactivate();
+                    if (a.takeDamage(1)) {
+                        hero.addScore(a.getHpMax() * 100);
+                    }
+                    break;
+                }
             }
         }
+        for (Meteor a : meteorController.getActiveList()) {
+            if (a.getHitArea().contains(hero.getPosition())) {
+                a.deactivate();
+                meteorController.setup(MathUtils.random(0, ScreenManager.SCREEN_WIDTH),
+                        MathUtils.random(0, ScreenManager.SCREEN_HEIGHT),
+                        MathUtils.random(-200, 200), MathUtils.random(-200, 200), 1.0f);
+                hero.decreaseHp();
+                break;
+            }
+        }
+
     }
 }

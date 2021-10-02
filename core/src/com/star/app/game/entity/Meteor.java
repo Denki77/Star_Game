@@ -1,88 +1,111 @@
 package com.star.app.game.entity;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.star.app.game.controllers.GameController;
+import com.star.app.game.helpers.Interface.Poolable;
 import com.star.app.screen.ScreenManager;
+import com.star.app.screen.utils.Assets;
 
-public class Meteor {
+public class Meteor implements Poolable {
+    private TextureRegion texture;
+    private GameController gc;
     private final Vector2 position;
     private final Vector2 velocity;
-    int x, y, xV, yV;
+    int x, y, xV, yV, hp, hpMax;
+    boolean active;
+    private float angle;
+    private float rotationSpeed;
     private float scale;
+    private Circle hitArea;
 
-    public Meteor() {
-        getNewXAndY();
+    private final float BASE_SIZE = 256.0f;
+    private final float BASE_RADIUS = BASE_SIZE / 2;
+
+    public Meteor(GameController gc) {
+        this.gc = gc;
         this.position = new Vector2(x, y);
         this.velocity = new Vector2(xV, yV);
-        setScale();
+        this.active = false;
+        this.hitArea = new Circle(0, 0, 0);
+        this.texture = Assets.getInstance().getAtlas().findRegion("asteroid");
     }
 
-    public void updateMeteorParameters() {
-        getNewXAndY();
-        this.position.x = x;
-        this.position.y = y;
-        this.velocity.x = xV;
-        this.velocity.y = yV;
-        setScale();
+    public void activate(float x, float y, float xV, float yV, float scale) {
+        this.position.set(x, y);
+        this.velocity.set(xV, yV);
+        this.hpMax = (int) (7 * scale);
+        this.hp = hpMax;
+        this.angle = MathUtils.random(0.0f, 360.0f);
+        this.rotationSpeed = MathUtils.random(-180.0f, 180.0f);
+        this.hitArea.setPosition(position);
+        this.scale = scale;
+        this.active = true;
+        this.hitArea.setRadius(BASE_RADIUS * scale * 0.9f);
+
     }
 
-    public Vector2 getPosition() {
-        return position;
+    public void render(SpriteBatch batch) {
+        batch.draw(texture, position.x - 128, position.y - 128, 128, 128,
+                256, 256, scale, scale, angle);
     }
 
-    public Vector2 getVelocity() {
-        return velocity;
+    public void update(float dt) {
+        position.mulAdd(velocity, dt);
+        angle += rotationSpeed * dt;
+
+        if (position.x < -ScreenManager.POSITION_OUT_OF_SCREEN) {
+            position.x = ScreenManager.SCREEN_WIDTH + ScreenManager.POSITION_OUT_OF_SCREEN;
+        }
+        if (position.x > ScreenManager.SCREEN_WIDTH + ScreenManager.POSITION_OUT_OF_SCREEN) {
+            position.x = -ScreenManager.POSITION_OUT_OF_SCREEN;
+        }
+        if (position.y < -ScreenManager.POSITION_OUT_OF_SCREEN) {
+            position.y = ScreenManager.SCREEN_HEIGHT + ScreenManager.POSITION_OUT_OF_SCREEN;
+        }
+        if (position.y > ScreenManager.SCREEN_HEIGHT + ScreenManager.POSITION_OUT_OF_SCREEN) {
+            position.y = -ScreenManager.POSITION_OUT_OF_SCREEN;
+        }
+        hitArea.setPosition(position);
     }
 
-    public float getScale() {
-        return scale;
+
+    public boolean takeDamage(int amount) {
+        hp -= amount;
+        if (hp <= 0) {
+            deactivate();
+            if (scale > 0.3) {
+                gc.getMeteorController().setup(position.x, position.y,
+                        MathUtils.random(-200, 200), MathUtils.random(-200, 200), scale - 0.2f);
+
+                gc.getMeteorController().setup(position.x, position.y,
+                        MathUtils.random(-200, 200), MathUtils.random(-200, 200), scale - 0.2f);
+
+                gc.getMeteorController().setup(position.x, position.y,
+                        MathUtils.random(-200, 200), MathUtils.random(-200, 200), scale - 0.2f);
+            }
+            return true;
+        }
+        return false;
     }
 
     public void deactivate() {
-        position.x = -ScreenManager.POSITION_OUT_OF_SCREEN;
-        position.y = -ScreenManager.POSITION_OUT_OF_SCREEN;
+        active = false;
     }
 
-    /**
-     * Сделал так, чтобы астро всегда появлялся за пределами видимости
-     */
-    private void getNewXAndY() {
-        x = MathUtils.random(-299, ScreenManager.SCREEN_WIDTH + 299);
-        if (x > 0 && x < ScreenManager.SCREEN_WIDTH) {
-            if (MathUtils.random(0, 1) == 1) {
-                y = ScreenManager.SCREEN_WIDTH + MathUtils.random(0, 299);
-            } else {
-                y = MathUtils.random(-299, 0);
-            }
-        } else {
-            y = MathUtils.random(-299, ScreenManager.SCREEN_HEIGHT + 299);
-        }
-        getRandomVelocity();
+    public int getHpMax() {
+        return hpMax;
     }
 
-    /**
-     * Вектор скорости всегда направлен в сторону экрана
-     */
-    private void getRandomVelocity() {
-        if (x < 0) {
-            xV = MathUtils.random(0, 400);
-        } else if (x > ScreenManager.SCREEN_WIDTH) {
-            xV = MathUtils.random(-400, 0);
-        } else {
-            xV = MathUtils.random(-400, 400);
-        }
-
-        if (y < 0) {
-            yV = MathUtils.random(0, 400);
-        } else if (y > ScreenManager.SCREEN_HEIGHT) {
-            yV = MathUtils.random(-400, 0);
-        } else {
-            yV = MathUtils.random(-400, 400);
-        }
-
+    public Circle getHitArea() {
+        return hitArea;
     }
 
-    private void setScale() {
-        this.scale = (float) (Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y) / 256f * 0.8f);
+    @Override
+    public boolean isActive() {
+        return active;
     }
 }
