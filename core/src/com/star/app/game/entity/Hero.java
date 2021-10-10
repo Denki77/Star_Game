@@ -13,7 +13,7 @@ import com.star.app.screen.utils.Assets;
 
 public class Hero {
     public enum Skill {
-        HP_MAX(20), HP(20), WEAPON(100);
+        HP_MAX(20), HP(20), WEAPON(100), MAGNET(50);
 
         int cost;
 
@@ -22,25 +22,31 @@ public class Hero {
         }
     }
 
-    private GameController gc;
-    private TextureRegion texture;
-    private Vector2 position;
-    private Vector2 velocity;
+    private final GameController gc;
+    private final TextureRegion texture;
+    private final Vector2 position;
+    private final Vector2 velocity;
     private float angle;
-    private float enginePower;
+    private final float enginePower;
     private float fireTimer;
     private int score;
     private int scoreView;
     private int hpMax;
     private int hp;
     private int money;
-    private StringBuilder stringBuilder;
-    private Circle hitArea;
+    private final StringBuilder stringBuilder;
+    private final Circle hitArea;
     private Weapon currentWeapon;
-    private Shop shop;
+    private final Circle magneticField;
+
+    private final Shop shop;
     private Weapon[] weapons;
     private int weaponNum;
 
+
+    public Circle getMagneticField() {
+        return magneticField;
+    }
 
     public Shop getShop() {
         return shop;
@@ -78,6 +84,10 @@ public class Hero {
         return hp > 0;
     }
 
+    public int getHp() {
+        return hp;
+    }
+
     public boolean isMoneyEnough(int amount) {
         return money >= amount;
     }
@@ -99,6 +109,7 @@ public class Hero {
         this.shop = new Shop(this);
         this.stringBuilder = new StringBuilder();
         this.hitArea = new Circle(position, 26);
+        this.magneticField = new Circle(position, 100);
         createWeapons();
         this.weaponNum = 0;
         this.currentWeapon = weapons[weaponNum];
@@ -116,11 +127,8 @@ public class Hero {
         stringBuilder.append("MONEY: ").append(money).append("\n");
         stringBuilder.append("BULLETS: ").append(currentWeapon.getCurBullets()).append(" / ")
                 .append(currentWeapon.getMaxBullets()).append("\n");
+        stringBuilder.append("MAGNETIC: ").append((int) magneticField.radius).append("\n");
         font.draw(batch, stringBuilder, 20, 700);
-    }
-
-    public void takeDamage(int amount) {
-        hp -= amount;
     }
 
     public void consume(PowerUp p) {
@@ -143,14 +151,24 @@ public class Hero {
                 hpMax += 10;
                 return true;
             case HP:
-                hp += 10;
-                return true;
+                if (hp < hpMax) {
+                    hp += 10;
+                    if (hp > hpMax) {
+                        hp = hpMax;
+                    }
+                    return true;
+                }
+                return false;
             case WEAPON:
                 if (weaponNum < weapons.length - 1) {
                     weaponNum++;
                     currentWeapon = weapons[weaponNum];
                     return true;
                 }
+                return false;
+            case MAGNET:
+                magneticField.radius += 10;
+                return true;
         }
         return false;
     }
@@ -177,8 +195,9 @@ public class Hero {
         }
 
         position.mulAdd(velocity, dt);
+        magneticField.setPosition(position);
         hitArea.setPosition(position);
-        float stopKoef = 1.0f - 1.0f * dt;
+        float stopKoef = 1.0f - dt;
         if (stopKoef < 0) {
             stopKoef = 0;
         }
@@ -246,14 +265,14 @@ public class Hero {
                                 new Vector3(28, -90, 0)
                         }),
                 new Weapon(
-                        gc, this, "Laser", 0.2f, 1, 600, 300,
+                        gc, this, "Laser2", 0.2f, 1, 600, 300,
                         new Vector3[]{
                                 new Vector3(28, 0, 0),
                                 new Vector3(28, 90, 20),
                                 new Vector3(28, -90, -20)
                         }),
                 new Weapon(
-                        gc, this, "Laser", 0.2f, 1, 600, 500,
+                        gc, this, "Laser3", 0.2f, 1, 600, 500,
                         new Vector3[]{
                                 new Vector3(28, 0, 0),
                                 new Vector3(28, 90, 10),
@@ -262,7 +281,7 @@ public class Hero {
                                 new Vector3(28, -90, -20)
                         }),
                 new Weapon(
-                        gc, this, "Laser", 0.1f, 2, 600, 1000,
+                        gc, this, "Laser4", 0.1f, 2, 600, 1000,
                         new Vector3[]{
                                 new Vector3(28, 0, 0),
                                 new Vector3(28, 90, 16),
@@ -270,4 +289,10 @@ public class Hero {
                         }),
         };
     }
+
+    public void decreaseHp(int amount) {
+        hp -= amount;
+    }
+
+
 }

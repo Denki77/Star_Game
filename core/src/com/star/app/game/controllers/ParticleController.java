@@ -71,31 +71,29 @@ public class ParticleController extends ObjectPool<Particle> {
 
     public void render(SpriteBatch batch) {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        for (int i = 0; i < activeList.size(); i++) {
-            Particle o = activeList.get(i);
-            float t = o.getTime() / o.getTimeMax();
-            float scale = lerp(o.getSize1(), o.getSize2(), t);
-            batch.setColor(lerp(o.getR1(), o.getR2(), t), lerp(o.getG1(), o.getG2(), t),
-                    lerp(o.getB1(), o.getB2(), t), lerp(o.getA1(), o.getA2(), t));
-            batch.draw(oneParticle, o.getPosition().x - 8, o.getPosition().y - 8,
-                    8, 8, 16, 16, scale, scale, 0);
+        for (Particle o : activeList) {
+            setColorForSimpleParticle(batch, o);
         }
         batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-        for (int i = 0; i < activeList.size(); i++) {
-            Particle o = activeList.get(i);
-            float t = o.getTime() / o.getTimeMax();
-            float scale = lerp(o.getSize1(), o.getSize2(), t);
-            if (MathUtils.random(0, 300) < 3) {
-                scale *= 5;
-            }
-            batch.setColor(lerp(o.getR1(), o.getR2(), t), lerp(o.getG1(), o.getG2(), t),
-                    lerp(o.getB1(), o.getB2(), t), lerp(o.getA1(), o.getA2(), t));
-            batch.draw(oneParticle, o.getPosition().x - 8, o.getPosition().y - 8,
-                    8, 8, 16, 16, scale, scale, 0);
+        for (Particle o : activeList) {
+
+            setColorForSimpleParticle(batch, o);
         }
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
+    private void setColorForSimpleParticle(SpriteBatch batch, Particle o) {
+        float t = o.getTime() / o.getTimeMax();
+        float scale = lerp(o.getSize1(), o.getSize2(), t);
+        if (MathUtils.random(0, 300) < 3) {
+            scale *= 5;
+        }
+        batch.setColor(lerp(o.getR1(), o.getR2(), t), lerp(o.getG1(), o.getG2(), t),
+                lerp(o.getB1(), o.getB2(), t), lerp(o.getA1(), o.getA2(), t));
+        batch.draw(oneParticle, o.getPosition().x - 8, o.getPosition().y - 8,
+                8, 8, 16, 16, scale, scale, 0);
     }
 
     public void setup(float x, float y, float vx, float vy,
@@ -107,8 +105,8 @@ public class ParticleController extends ObjectPool<Particle> {
     }
 
     public void update(float dt) {
-        for (int i = 0; i < activeList.size(); i++) {
-            activeList.get(i).update(dt);
+        for (Particle particle : activeList) {
+            particle.update(dt);
         }
         checkPool();
     }

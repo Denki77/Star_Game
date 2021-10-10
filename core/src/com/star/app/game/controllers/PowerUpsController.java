@@ -8,12 +8,12 @@ import com.star.app.game.helpers.ObjectPool;
 import com.star.app.screen.utils.Assets;
 
 public class PowerUpsController extends ObjectPool<PowerUp> {
-    private GameController gc;
-    private TextureRegion[][] textures;
+    private final GameController gc;
+    private final TextureRegion[][] textures;
 
     @Override
     protected PowerUp newObject() {
-        return new PowerUp(gc);
+        return new PowerUp();
     }
 
     public PowerUpsController(GameController gc) {
@@ -23,9 +23,8 @@ public class PowerUpsController extends ObjectPool<PowerUp> {
     }
 
     public void render(SpriteBatch batch) {
-        for (int i = 0; i < activeList.size(); i++) {
-            PowerUp p = activeList.get(i);
-            int frameIndex = (int)(p.getTime() / 0.1f) % textures[p.getType().index].length;
+        for (PowerUp p : activeList) {
+            int frameIndex = (int) (p.getTime() / 0.1f) % textures[p.getType().index].length;
             batch.draw(textures[p.getType().index][frameIndex], p.getPosition().x - 30, p.getPosition().y - 30);
         }
     }
@@ -37,8 +36,8 @@ public class PowerUpsController extends ObjectPool<PowerUp> {
     }
 
     public void update(float dt) {
-        for (int i = 0; i < activeList.size(); i++) {
-            activeList.get(i).update(dt);
+        for (PowerUp powerUp : activeList) {
+            powerUp.update(dt);
         }
         checkPool();
     }

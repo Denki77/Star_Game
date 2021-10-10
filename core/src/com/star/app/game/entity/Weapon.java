@@ -2,17 +2,28 @@ package com.star.app.game.entity;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.star.app.game.controllers.GameController;
 
 public class Weapon {
-    private GameController gc;
-    private Hero hero;
-    private String title;
-    private float firePeriod;
-    private int damage;
-    private float bulletSpeed;
-    private int maxBullets;
+
+    private final GameController gc;
+    private final Hero hero;
+
+    private final String title;
+    private final float firePeriod;
+    private final int damage;
+    private final float bulletSpeed;
+    private final int maxBullets;
     private int curBullets;
-    private Vector3[] slots;
+    private final Vector3[] slots;
+
+    public String getTitle() {
+        return title;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
 
     public float getFirePeriod() {
         return firePeriod;
@@ -44,14 +55,14 @@ public class Weapon {
         if (curBullets > 0) {
             curBullets--;
 
-            for (int i = 0; i < slots.length; i++) {
+            for (Vector3 slot : slots) {
                 float x, y, vx, vy;
 
-                x = hero.getPosition().x + MathUtils.cosDeg(hero.getAngle() + slots[i].y) * slots[i].x;
-                y = hero.getPosition().y + MathUtils.sinDeg(hero.getAngle() + slots[i].y) * slots[i].x;
+                x = hero.getPosition().x + MathUtils.cosDeg(hero.getAngle() + slot.y) * slot.x;
+                y = hero.getPosition().y + MathUtils.sinDeg(hero.getAngle() + slot.y) * slot.x;
 
-                vx = hero.getVelocity().x + bulletSpeed * MathUtils.cosDeg(hero.getAngle() + slots[i].z);
-                vy = hero.getVelocity().y + bulletSpeed * MathUtils.sinDeg(hero.getAngle() + slots[i].z);
+                vx = hero.getVelocity().x + bulletSpeed * MathUtils.cosDeg(hero.getAngle() + slot.z);
+                vy = hero.getVelocity().y + bulletSpeed * MathUtils.sinDeg(hero.getAngle() + slot.z);
 
                 gc.getBulletController().setup(x, y, vx, vy);
             }

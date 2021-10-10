@@ -11,33 +11,68 @@ import com.star.app.screen.ScreenManager;
 import com.star.app.screen.utils.Assets;
 
 public class Meteor implements Poolable {
-    private TextureRegion texture;
-    private GameController gc;
+    private final TextureRegion texture;
+    private final GameController gc;
     private final Vector2 position;
     private final Vector2 velocity;
-    int x, y, xV, yV, hp, hpMax;
-    boolean active;
-    private float angle;
-    private float rotationSpeed;
-    private float scale;
+    private int hp;
+    private int hpMax;
+    private float angle;//угол показа изображения
+    private float rotationSpeed;//скорость вращения
+    private float scale;//масштаб
+    private boolean active;
     private Circle hitArea;
 
     private final float BASE_SIZE = 256.0f;
     private final float BASE_RADIUS = BASE_SIZE / 2;
 
+    public float getScale() {
+        return scale;
+    }
+
+    public int getHpMax() {
+        return hpMax;
+    }
+
+    public Vector2 getVelocity() {
+        return velocity;
+    }
+
+    public Circle getHitArea() {
+        return hitArea;
+    }
+
+    public Vector2 getPosition() {
+        return position;
+    }
+
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+
     public Meteor(GameController gc) {
         this.gc = gc;
-        this.position = new Vector2(x, y);
-        this.velocity = new Vector2(xV, yV);
-        this.active = false;
+        this.position = new Vector2(0, 0);
+        this.velocity = new Vector2(0, 0);
         this.hitArea = new Circle(0, 0, 0);
+        this.active = false;
         this.texture = Assets.getInstance().getAtlas().findRegion("asteroid");
     }
 
-    public void activate(float x, float y, float xV, float yV, float scale) {
+    public void render(SpriteBatch batch) {
+        batch.draw(texture, position.x - 128, position.y - 128, 128, 128,
+                256, 256, scale, scale, angle);
+    }
+
+    public void deactivate() {
+        active = false;
+    }
+
+    public void activate(float x, float y, float vx, float vy, float scale) {
         this.position.set(x, y);
-        this.velocity.set(xV, yV);
-        this.hpMax = (int) (7 * scale);
+        this.velocity.set(vx, vy);
+        this.hpMax = (int) ((5 + gc.getLevel() * 2) * scale);
         this.hp = hpMax;
         this.angle = MathUtils.random(0.0f, 360.0f);
         this.rotationSpeed = MathUtils.random(-180.0f, 180.0f);
@@ -45,12 +80,6 @@ public class Meteor implements Poolable {
         this.scale = scale;
         this.active = true;
         this.hitArea.setRadius(BASE_RADIUS * scale * 0.9f);
-
-    }
-
-    public void render(SpriteBatch batch) {
-        batch.draw(texture, position.x - 128, position.y - 128, 128, 128,
-                256, 256, scale, scale, angle);
     }
 
     public void update(float dt) {
@@ -90,22 +119,5 @@ public class Meteor implements Poolable {
             return true;
         }
         return false;
-    }
-
-    public void deactivate() {
-        active = false;
-    }
-
-    public int getHpMax() {
-        return hpMax;
-    }
-
-    public Circle getHitArea() {
-        return hitArea;
-    }
-
-    @Override
-    public boolean isActive() {
-        return active;
     }
 }

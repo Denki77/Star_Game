@@ -2,11 +2,10 @@ package com.star.app.game.entity;
 
 import com.badlogic.gdx.math.Vector2;
 import com.star.app.game.helpers.Interface.Poolable;
-import com.star.app.game.helpers.Poolable;
 
-public class Particle implements Poolable, Poolable {
-    private Vector2 position;
-    private Vector2 velocity;
+public class Particle implements Poolable {
+    private final Vector2 position;
+    private final Vector2 velocity;
     private float r1, g1, b1, a1;
     private float r2, g2, b2, a2;
 

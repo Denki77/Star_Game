@@ -7,9 +7,9 @@ import com.star.app.game.helpers.Interface.Poolable;
 import com.star.app.screen.ScreenManager;
 
 public class Bullet implements Poolable {
-    private GameController gc;
-    private Vector2 position;
-    private Vector2 velocity;
+    private final GameController gc;
+    private final Vector2 position;
+    private final Vector2 velocity;
     private boolean active;
 
     public Vector2 getVelocity() {
