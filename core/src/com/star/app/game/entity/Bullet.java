@@ -8,6 +8,7 @@ import com.star.app.screen.ScreenManager;
 
 public class Bullet implements Poolable {
     private final GameController gc;
+    private Weapon weapon;
     private final Vector2 position;
     private final Vector2 velocity;
     private boolean active;
