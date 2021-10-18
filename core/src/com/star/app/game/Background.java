@@ -1,14 +1,18 @@
-package com.star.game;
+package com.star.app.game;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.star.app.game.controllers.GameController;
+import com.star.app.screen.ScreenManager;
+import com.star.app.screen.utils.Assets;
 
 public class Background {
     private class Star {
-        private Vector2 position;
-        private Vector2 velocity;
+        private final Vector2 position;
+        private final Vector2 velocity;
         private float scale;
 
         public Star() {
@@ -19,8 +23,12 @@ public class Background {
         }
 
         public void update(float dt) {
-            position.x += (velocity.x - game.getHero().getLastDisplacement().x * 15) * dt;
-            position.y += (velocity.y - game.getHero().getLastDisplacement().y * 15) * dt;
+            if (gc != null) {
+                position.x += (velocity.x - gc.getHero().getVelocity().x * 0.1) * dt;
+                position.y += (velocity.y - gc.getHero().getVelocity().y * 0.1) * dt;
+            } else {
+                position.mulAdd(velocity, dt);
+            }
 
             if (position.x < -200) {
                 position.x = ScreenManager.SCREEN_WIDTH + 200;
@@ -31,15 +39,15 @@ public class Background {
     }
 
     private final int STAR_COUNT = 1000;
-    private StarGame game;
-    private Texture textureCosmos;
-    private Texture textureStar;
-    private Star[] stars;
+    private final GameController gc;
+    private final Texture textureCosmos;
+    private final TextureRegion textureStar;
+    private final Star[] stars;
 
-    public Background(StarGame game) {
-        this.textureCosmos = new Texture("bg.png");
-        this.textureStar = new Texture("star16.png");
-        this.game = game;
+    public Background(GameController gc) {
+        this.textureCosmos = new Texture("images/bg.png");
+        this.textureStar = Assets.getInstance().getAtlas().findRegion("star16");
+        this.gc = gc;
         this.stars = new Star[STAR_COUNT];
         for (int i = 0; i < stars.length; i++) {
             stars[i] = new Star();
@@ -51,11 +59,11 @@ public class Background {
 
         for (Star star : stars) {
             batch.draw(textureStar, star.position.x - 8, star.position.y - 8, 8, 8, 16, 16,
-                    star.scale, star.scale, 0, 0, 0, 16, 16, false, false);
+                    star.scale, star.scale, 0);
 
             if (MathUtils.random(0, 300) < 1) {
                 batch.draw(textureStar, star.position.x - 8, star.position.y - 8, 8, 8, 16, 16,
-                        star.scale * 2, star.scale * 2, 0, 0, 0, 16, 16, false, false);
+                        star.scale * 2, star.scale * 2, 0);
             }
         }
     }
@@ -65,4 +73,9 @@ public class Background {
             star.update(dt);
         }
     }
+
+    public void dispose() {
+        textureCosmos.dispose();
+    }
+
 }
